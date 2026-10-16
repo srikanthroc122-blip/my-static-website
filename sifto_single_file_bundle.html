@@ -1,0 +1,2501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sifto — Production-Ready App (Step 10)</title>
+  <style>
+    /* ==========================================
+       PART 2: CSS (Custom Chore Creator & Address Book)
+       ========================================== */
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --primary-light: #eef2ff;
+      --accent: #10b981;
+      --accent-light: #ecfdf5;
+      --warning: #f59e0b;
+      --warning-light: #fffbeb;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --surface: #f1f5f9;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    body.dark-mode {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #1e1b4b;
+      --accent-light: #064e3b;
+      --warning-light: #451a03;
+      --danger-light: #450a0a;
+      --bg: #090d16;
+      --card: #111827;
+      --surface: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 20px 14px;
+      min-height: 100vh;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 460px;
+      background: var(--card);
+      border-radius: 24px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 680px;
+      position: relative;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #ffffff;
+      padding: 20px 20px 16px;
+    }
+
+    .header-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .theme-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 999px;
+      padding: 4px 11px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .app-header h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .app-header p {
+      font-size: 13px;
+      opacity: 0.92;
+      margin-top: 3px;
+    }
+
+    .wallet-bar {
+      margin-top: 12px;
+      background: rgba(15, 23, 42, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 14px;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .wallet-info {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .wallet-topup-btn {
+      background: #ffffff;
+      color: #312e81;
+      border: none;
+      border-radius: 9px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .app-body {
+      padding: 18px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-page {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .app-page.active-page {
+      display: flex;
+    }
+
+    /* 3-Step Booking Wizard inside Book Tab */
+    .wizard-stepper {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: var(--surface);
+      padding: 6px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .wizard-pill {
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .wizard-pill.active-wizard {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .wizard-pane {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .wizard-pane.active-pane {
+      display: flex;
+    }
+
+    .wizard-nav-row {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .secondary-btn {
+      flex: 1;
+      background: var(--surface);
+      color: var(--text);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 13px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary-next-btn {
+      flex: 2;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      padding: 13px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Sticky Bottom Navigation Bar (5 Tabs) */
+    .bottom-nav {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      padding: 8px 4px 10px;
+      gap: 3px;
+    }
+
+    .nav-tab {
+      background: transparent;
+      border: none;
+      border-radius: 12px;
+      padding: 8px 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s ease;
+    }
+
+    .nav-tab.active-nav {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .nav-icon {
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: 3px;
+      right: 10px;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 999px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    /* 2x2 grid for service cards */
+    .service-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .service-card {
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 12px;
+      text-align: left;
+      background: var(--card);
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .service-card:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    .service-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .service-icon {
+      font-size: 24px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .service-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      display: block;
+    }
+
+    .service-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      display: block;
+    }
+
+    .service-price {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-top: 6px;
+      display: block;
+    }
+
+    /* NEW IN STEP 9: Custom Chore Builder Box */
+    .custom-chore-box {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .custom-chore-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* NEW IN STEP 9: Saved Address Book Pills */
+    .address-book-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .address-pill {
+      background: var(--surface);
+      color: var(--text);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .address-pill.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .plan-toggle-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .plan-pill {
+      border: 2px solid var(--border);
+      background: var(--card);
+      border-radius: 12px;
+      padding: 9px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .plan-pill.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* Duration Pills */
+    .hours-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .hour-pill {
+      border: 2px solid var(--border);
+      background: var(--card);
+      border-radius: 12px;
+      padding: 10px 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .hour-pill.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* Choose Sifto Pro Cards & Payment Cards */
+    .pro-list, .payment-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .pro-card, .payment-card {
+      border: 2px solid var(--border);
+      background: var(--card);
+      border-radius: 14px;
+      padding: 10px 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .pro-card.selected, .payment-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .pro-name, .payment-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      display: block;
+    }
+
+    .pro-sub, .payment-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+      display: block;
+    }
+
+    /* Address, Time & Special Notes Inputs */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .text-input, .select-input {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--card);
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .text-input:focus, .select-input:focus {
+      border-color: var(--primary);
+    }
+
+    /* Promo Code & Quick Note Chips */
+    .promo-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .apply-btn {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 0 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .promo-chips, .note-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .promo-chip, .note-chip {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .promo-feedback {
+      display: none;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 10px;
+      border-radius: 10px;
+      margin-top: 6px;
+    }
+
+    .promo-feedback.success {
+      display: block;
+      background: var(--accent-light);
+      color: #10b981;
+    }
+
+    .promo-feedback.error {
+      display: block;
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .error-msg {
+      display: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--danger);
+      background: var(--danger-light);
+      padding: 8px 12px;
+      border-radius: 10px;
+    }
+
+    .error-msg.visible {
+      display: block;
+    }
+
+    /* Summary & Primary Action Button */
+    .booking-bar {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .booking-bar-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .booking-bar-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 2px;
+    }
+
+    .discount-tag {
+      color: #10b981;
+      font-weight: 700;
+    }
+
+    .book-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .book-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    /* Confirmation Box */
+    .confirmation-card {
+      display: none;
+      background: var(--accent-light);
+      border: 1.5px solid #10b981;
+      border-radius: 16px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .confirmation-card.visible {
+      display: block;
+    }
+
+    .confirmation-title {
+      font-weight: 800;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: #10b981;
+    }
+
+    /* Live Arrival Tracker Card */
+    .tracker-card {
+      display: none;
+      background: var(--primary-light);
+      border: 1.5px solid var(--primary);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .tracker-card.visible {
+      display: block;
+    }
+
+    .tracker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .tracker-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .otp-pill {
+      background: var(--card);
+      color: var(--primary);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 8px;
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 25%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    .tracker-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      font-size: 11px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .tracker-step {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .tracker-step.active {
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .tracker-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tracker-status-text {
+      font-size: 12px;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .step-btn {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Live In-App Chat Card */
+    .chat-card {
+      display: none;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat-card.visible {
+      display: flex;
+    }
+
+    .chat-messages {
+      max-height: 170px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px;
+      background: var(--surface);
+      border-radius: 12px;
+    }
+
+    .chat-bubble {
+      max-width: 82%;
+      padding: 8px 11px;
+      border-radius: 12px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .chat-bubble.user {
+      align-self: flex-end;
+      background: var(--primary);
+      color: #ffffff;
+      border-bottom-right-radius: 3px;
+    }
+
+    .chat-bubble.pro {
+      align-self: flex-start;
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 3px;
+    }
+
+    .chat-sender {
+      font-size: 10px;
+      font-weight: 700;
+      opacity: 0.8;
+      margin-bottom: 2px;
+      display: block;
+    }
+
+    /* Printable / Copyable Receipt Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal-backdrop.visible {
+      display: flex;
+    }
+
+    .receipt-modal-box {
+      width: 100%;
+      max-width: 380px;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .receipt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 10px;
+    }
+
+    .receipt-body {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--surface);
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    .receipt-btn {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* My Saved Bookings List + Filter Controls */
+    .bookings-section {
+      padding-top: 4px;
+    }
+
+    .bookings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .count-badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 999px;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .filter-tab {
+      flex: 1;
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 7px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .filter-tab.selected {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .search-box {
+      margin-bottom: 12px;
+    }
+
+    .bookings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .empty-state {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      padding: 18px 14px;
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+    }
+
+    .booking-item {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--card);
+    }
+
+    .booking-item.completed {
+      background: var(--surface);
+    }
+
+    .booking-item-info {
+      font-size: 13px;
+      line-height: 1.45;
+      flex: 1;
+    }
+
+    .booking-item-title {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .booking-item-sub {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .booking-note-tag {
+      display: inline-block;
+      margin-top: 4px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .rating-row {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .rating-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-right: 4px;
+    }
+
+    .star-btn {
+      background: var(--warning-light);
+      border: 1px solid #fde68a;
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 12px;
+      cursor: pointer;
+      color: #d97706;
+      font-weight: 700;
+    }
+
+    .star-btn.rated {
+      background: var(--warning);
+      color: #ffffff;
+      border-color: var(--warning);
+    }
+
+    .booking-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .track-btn {
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .done-btn {
+      background: var(--accent-light);
+      color: #10b981;
+      border: 1px solid #10b981;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .cancel-btn {
+      background: var(--danger-light);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Wallet & Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .topup-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .topup-card-btn {
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==========================================
+       PART 1: HTML (Custom Chore Creator + Saved Address Book)
+       ========================================== -->
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="header-top-row">
+        <span class="badge">🚀 Step 10: Complete App + Rebook & Cloud-Ready</span>
+        <button class="theme-btn" id="theme-toggle-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+      </div>
+      <h1>Sifto</h1>
+      <p>Hi Sifto! Create custom chores and switch between saved Hyderabad addresses.</p>
+      <div class="wallet-bar">
+        <div class="wallet-info">💰 Sifto Wallet: <span id="wallet-balance">₹500</span></div>
+        <button class="wallet-topup-btn" onclick="topUpWallet(200)">+ Add ₹200</button>
+      </div>
+    </header>
+
+    <main class="app-body">
+      <!-- ==========================================
+           SCREEN 1: BOOK A PRO (3-STEP WIZARD)
+           ========================================== -->
+      <section class="app-page active-page" id="page-book">
+        <div class="wizard-stepper">
+          <button class="wizard-pill active-wizard" id="wiz-tab-1" onclick="goWizardStep(1)">① Chore & Hours</button>
+          <button class="wizard-pill" id="wiz-tab-2" onclick="goWizardStep(2)">② Pro & Address</button>
+          <button class="wizard-pill" id="wiz-tab-3" onclick="goWizardStep(3)">③ Pay & Book</button>
+        </div>
+
+        <!-- WIZARD PANE 1: Chore, Custom Chore Builder & Duration -->
+        <div class="wizard-pane active-pane" id="wiz-pane-1">
+          <div>
+            <div class="section-title">1. Tap a chore to select it:</div>
+            <div class="service-grid" id="service-grid">
+              <button class="service-card selected" onclick="selectService(this, 'Home Cleaning', 199, '15 mins')">
+                <span class="service-icon">🧹</span>
+                <span class="service-name">Home Cleaning</span>
+                <span class="service-meta">Sweeping & mopping</span>
+                <span class="service-price">₹199 / hr</span>
+              </button>
+
+              <button class="service-card" onclick="selectService(this, 'Kitchen Prep', 179, '12 mins')">
+                <span class="service-icon">🥗</span>
+                <span class="service-name">Kitchen Prep</span>
+                <span class="service-meta">Chopping & kneading</span>
+                <span class="service-price">₹179 / hr</span>
+              </button>
+
+              <button class="service-card" onclick="selectService(this, 'Laundry Care', 149, '18 mins')">
+                <span class="service-icon">👕</span>
+                <span class="service-name">Laundry Care</span>
+                <span class="service-meta">Wash, fold & iron</span>
+                <span class="service-price">₹149 / hr</span>
+              </button>
+
+              <button class="service-card" onclick="selectService(this, 'Utensil Wash', 129, '10 mins')">
+                <span class="service-icon">🍽️</span>
+                <span class="service-name">Utensil Wash</span>
+                <span class="service-meta">Sink & counter reset</span>
+                <span class="service-price">₹129 / hr</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- NEW IN STEP 9: Add Your Own Custom Chore -->
+          <div class="custom-chore-box">
+            <div class="section-title" style="margin-bottom: 0;">✨ Add Your Own Custom Chore:</div>
+            <div class="custom-chore-row">
+              <select id="custom-chore-icon" class="select-input" style="width: 74px; padding: 8px;">
+                <option value="🪴">🪴</option>
+                <option value="🚗">🚗</option>
+                <option value="🪟">🪟</option>
+                <option value="🐾">🐾</option>
+                <option value="📦">📦</option>
+              </select>
+              <input
+                type="text"
+                id="custom-chore-name"
+                class="text-input"
+                placeholder="Chore name (e.g. Balcony Garden)"
+              />
+              <input
+                type="number"
+                id="custom-chore-price"
+                class="text-input"
+                style="width: 88px;"
+                placeholder="₹/hr"
+                value="159"
+              />
+              <button class="apply-btn" onclick="addCustomChore()">+ Add</button>
+            </div>
+            <div id="custom-chore-feedback" class="promo-feedback"></div>
+          </div>
+
+          <div>
+            <div class="section-title">2. Frequency & duration:</div>
+            <div class="plan-toggle-row">
+              <button class="plan-pill selected" onclick="selectFrequency(this, 'One-Time')">⚡ One-Time Visit</button>
+              <button class="plan-pill" onclick="selectFrequency(this, 'Weekly Plan')">📅 Weekly Plan (15% OFF)</button>
+            </div>
+            <div class="hours-row">
+              <button class="hour-pill selected" onclick="selectHours(this, 1)">1 hr</button>
+              <button class="hour-pill" onclick="selectHours(this, 2)">2 hrs</button>
+              <button class="hour-pill" onclick="selectHours(this, 3)">3 hrs</button>
+              <button class="hour-pill" onclick="selectHours(this, 4)">4 hrs</button>
+            </div>
+          </div>
+
+          <div class="wizard-nav-row">
+            <button class="primary-next-btn" onclick="goWizardStep(2)">Next: Pro & Address →</button>
+          </div>
+        </div>
+
+        <!-- WIZARD PANE 2: Pro & Saved Address Book -->
+        <div class="wizard-pane" id="wiz-pane-2">
+          <div>
+            <div class="section-title">3. Choose your Sifto Pro:</div>
+            <div class="pro-list">
+              <button class="pro-card selected" onclick="selectPro(this, 'Auto-Assign')">
+                <span class="pro-name">⚡ Auto-Assign</span>
+                <span class="pro-sub">Fastest nearby Pro</span>
+              </button>
+              <button class="pro-card" onclick="selectPro(this, 'Ananya R. (⭐ 4.9)')">
+                <span class="pro-name">👩🏽‍🔧 Ananya R. ⭐ 4.9</span>
+                <span class="pro-sub">Deep Clean · 340+ jobs</span>
+              </button>
+              <button class="pro-card" onclick="selectPro(this, 'Kavitha M. (⭐ 4.9)')">
+                <span class="pro-name">👩🏽‍🍳 Kavitha M. ⭐ 4.9</span>
+                <span class="pro-sub">Kitchen Pro · 280+ jobs</span>
+              </button>
+              <button class="pro-card" onclick="selectPro(this, 'Ramesh K. (⭐ 4.8)')">
+                <span class="pro-name">👨🏽‍🔧 Ramesh K. ⭐ 4.8</span>
+                <span class="pro-sub">Laundry & Iron · 410+ jobs</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-title">4. Saved Address Book & arrival time:</div>
+            <!-- NEW IN STEP 9: 1-Tap Saved Address Pills -->
+            <div class="address-book-row" id="address-book-row">
+              <button class="address-pill selected" onclick="selectSavedAddress(this, 'Flat 302, Jubilee Hills')">
+                🏠 Home (Jubilee Hills)
+              </button>
+              <button class="address-pill" onclick="selectSavedAddress(this, 'Tower B, Mindspace, HITEC City')">
+                🏢 Office (HITEC City)
+              </button>
+              <button class="address-pill" onclick="selectSavedAddress(this, 'Plot 18, Road No. 12, Banjara Hills')">
+                👵 Parents (Banjara Hills)
+              </button>
+            </div>
+
+            <div class="input-group">
+              <div class="promo-row">
+                <input
+                  type="text"
+                  id="address-input"
+                  class="text-input"
+                  placeholder="Flat / House No., Building, Area (e.g. Flat 302, Madhapur)"
+                  value="Flat 302, Jubilee Hills"
+                />
+                <button class="apply-btn" onclick="saveCurrentAddressToBook()">Save 📍</button>
+              </div>
+              <select id="slot-input" class="select-input">
+                <option value="Instant (in ~15 mins)">⚡ Instant Arrival (in ~15 mins)</option>
+                <option value="Today, 5:00 PM">🕔 Today, 5:00 PM</option>
+                <option value="Today, 7:00 PM">🕖 Today, 7:00 PM</option>
+                <option value="Tomorrow, 9:00 AM">🕘 Tomorrow, 9:00 AM</option>
+              </select>
+              <input
+                type="text"
+                id="notes-input"
+                class="text-input"
+                placeholder="Optional note (e.g. Ring bell softly, use eco floor cleaner)"
+              />
+              <div class="note-chips">
+                <button class="note-chip" onclick="addQuickNote('🐾 Friendly pet at home')">+ 🐾 Pet at home</button>
+                <button class="note-chip" onclick="addQuickNote('🧴 Use eco floor cleaner')">+ 🧴 Eco cleaner</button>
+                <button class="note-chip" onclick="addQuickNote('🔕 Call on arrival, do not ring bell')">+ 🔕 Don't ring bell</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-nav-row">
+            <button class="secondary-btn" onclick="goWizardStep(1)">← Back</button>
+            <button class="primary-next-btn" onclick="goWizardStep(3)">Next: Payment →</button>
+          </div>
+        </div>
+
+        <!-- WIZARD PANE 3: Promo, Payment & Confirm -->
+        <div class="wizard-pane" id="wiz-pane-3">
+          <div>
+            <div class="section-title">5. Promo code & payment method:</div>
+            <div class="promo-row">
+              <input
+                type="text"
+                id="promo-input"
+                class="text-input"
+                placeholder="Enter code (e.g. SIFTO50)"
+              />
+              <button class="apply-btn" onclick="applyPromoCode()">Apply</button>
+            </div>
+            <div class="promo-chips">
+              <button class="promo-chip" onclick="quickFillPromo('SIFTO50')">🏷️ Tap to use SIFTO50 (₹50 OFF)</button>
+              <button class="promo-chip" onclick="quickFillPromo('FIRST100')">🎉 Tap to use FIRST100 (₹100 OFF on 2+ hrs)</button>
+            </div>
+            <div id="promo-feedback" class="promo-feedback"></div>
+
+            <div class="payment-grid" style="margin-top: 10px;">
+              <button class="payment-card selected" onclick="selectPayment(this, 'UPI — GPay / PhonePe')">
+                <span class="payment-name">📱 UPI Instant</span>
+                <span class="payment-sub">GPay, PhonePe, Paytm</span>
+              </button>
+              <button class="payment-card" onclick="selectPayment(this, 'Sifto Wallet')">
+                <span class="payment-name">💰 Sifto Wallet</span>
+                <span class="payment-sub">Instant 1-tap balance</span>
+              </button>
+              <button class="payment-card" onclick="selectPayment(this, 'Credit / Debit Card')">
+                <span class="payment-name">💳 Card</span>
+                <span class="payment-sub">Visa, RuPay, Mastercard</span>
+              </button>
+              <button class="payment-card" onclick="selectPayment(this, 'Cash After Service')">
+                <span class="payment-name">💵 Pay After Service</span>
+                <span class="payment-sub">Cash or QR at doorstep</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="address-error" class="error-msg">
+            Please enter your flat/house address before booking.
+          </div>
+
+          <div class="booking-bar">
+            <div>
+              <div class="booking-bar-label">Selected Plan</div>
+              <div class="booking-bar-value" id="selected-name">Home Cleaning · 1 hr</div>
+            </div>
+            <div style="text-align: right;">
+              <div class="booking-bar-label" id="price-breakdown">₹199 × 1 hr</div>
+              <div class="booking-bar-value" id="selected-price">₹199</div>
+            </div>
+          </div>
+
+          <div class="wizard-nav-row">
+            <button class="secondary-btn" onclick="goWizardStep(2)">← Back</button>
+            <button class="book-btn" style="flex: 2;" onclick="bookSiftoPro()">
+              Book a Sifto Pro Now →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SCREEN 2: LIVE PRO TRACKER + IN-APP CHAT
+           ========================================== -->
+      <section class="app-page" id="page-track">
+        <div class="section-title">🛵 Live Doorstep Tracker & Chat</div>
+
+        <div class="confirmation-card" id="confirmation-box">
+          <div class="confirmation-title" id="confirm-heading">✅ Sifto Pro Assigned!</div>
+          <div id="confirm-details"></div>
+        </div>
+
+        <div class="tracker-card" id="live-tracker-card">
+          <div class="tracker-header">
+            <div class="tracker-title" id="tracker-pro-title">🛵 Live Pro Tracker</div>
+            <span class="otp-pill" id="tracker-otp">Start OTP: 4829</span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="tracker-bar-fill"></div>
+          </div>
+          <div class="tracker-steps">
+            <div class="tracker-step active" id="stage-0">1. Assigned</div>
+            <div class="tracker-step" id="stage-1">2. En Route</div>
+            <div class="tracker-step" id="stage-2">3. At Door</div>
+            <div class="tracker-step" id="stage-3">4. Working</div>
+          </div>
+          <div class="tracker-controls">
+            <div class="tracker-status-text" id="tracker-status-text">Pro confirmed your booking and packed supplies.</div>
+            <button class="step-btn" id="advance-stage-btn" onclick="advanceTrackerStage()">Next Stage ▶</button>
+          </div>
+        </div>
+
+        <!-- Live Customer <-> Pro Chat Box -->
+        <div class="chat-card" id="chat-card">
+          <div class="tracker-header" style="margin-bottom: 0;">
+            <div class="section-title" id="chat-header-title" style="margin-bottom: 0;">💬 Chat with Sifto Pro</div>
+            <span class="count-badge">Online 🟢</span>
+          </div>
+
+          <div class="chat-messages" id="chat-messages"></div>
+
+          <div class="note-chips">
+            <button class="note-chip" onclick="sendQuickChat('👋 Hi! I am at home, please come up to Flat 302.')">👋 I'm home</button>
+            <button class="note-chip" onclick="sendQuickChat('🔑 Security gate passcode is #1204.')">🔑 Gate code #1204</button>
+            <button class="note-chip" onclick="sendQuickChat('🧴 Please bring extra microfiber cloths.')">🧴 Extra cloths</button>
+          </div>
+
+          <div class="promo-row">
+            <input
+              type="text"
+              id="chat-input"
+              class="text-input"
+              placeholder="Message your Sifto Pro..."
+            />
+            <button class="apply-btn" onclick="sendChatMessage()">Send 💬</button>
+          </div>
+        </div>
+
+        <div class="empty-state" id="no-tracker-empty">
+          No active Pro on the way right now. Book a service on the <strong>🏠 Book</strong> tab or tap <strong>Track Live 📍</strong> on any active booking!
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SCREEN 3: MY SAVED BOOKINGS (Bookings Tab)
+           ========================================== -->
+      <section class="app-page" id="page-bookings">
+        <div class="bookings-section">
+          <div class="bookings-header">
+            <div class="section-title" style="margin-bottom: 0;">My Saved Bookings</div>
+            <span class="count-badge" id="booking-count">0 saved</span>
+          </div>
+
+          <div class="filter-bar">
+            <button class="filter-tab selected" onclick="setBookingFilter(this, 'ALL')">All</button>
+            <button class="filter-tab" onclick="setBookingFilter(this, 'ACTIVE')">Active</button>
+            <button class="filter-tab" onclick="setBookingFilter(this, 'COMPLETED')">Completed</button>
+          </div>
+
+          <div class="search-box">
+            <input
+              type="text"
+              id="search-bookings-input"
+              class="text-input"
+              placeholder="🔍 Search bookings by chore, Pro, or ID..."
+              oninput="renderBookings()"
+            />
+          </div>
+
+          <div class="bookings-list" id="bookings-list">
+            <div class="empty-state">No bookings yet. Tap "Book a Sifto Pro Now" on the Book tab!</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SCREEN 4: WALLET & PROFILE (Wallet Tab)
+           ========================================== -->
+      <section class="app-page" id="page-wallet">
+        <div class="section-title">💰 Sifto Wallet & Activity Summary</div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="stat-total-bookings">0</div>
+            <div class="stat-label">Total Bookings</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-wallet-card">₹500</div>
+            <div class="stat-label">Wallet Balance</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-total-saved">₹0</div>
+            <div class="stat-label">Promo Saved</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">Instant Wallet Top-Up:</div>
+          <div class="topup-grid">
+            <button class="topup-card-btn" onclick="topUpWallet(100)">+ ₹100</button>
+            <button class="topup-card-btn" onclick="topUpWallet(200)">+ ₹200</button>
+            <button class="topup-card-btn" onclick="topUpWallet(500)">+ ₹500</button>
+          </div>
+        </div>
+
+        <div class="booking-bar" style="flex-direction: column; align-items: flex-start; gap: 6px;">
+          <div class="booking-bar-value">👤 Member Profile: Sifto</div>
+          <div class="booking-bar-label">📍 Default Area: Jubilee Hills, Hyderabad</div>
+          <div class="booking-bar-label">🛡️ Verified Sifto Plus Member · Zero Surge Fee</div>
+        </div>
+        <div>
+          <div class="section-title">🗄️ Data & Cloud Sync Controls:</div>
+          <div class="plan-toggle-row">
+            <button class="plan-pill" onclick="exportBookingsJson()">⬇️ Export Bookings JSON</button>
+            <button class="plan-pill" onclick="resetDemoData()">🔄 Reset App Data</button>
+          </div>
+          <div id="data-feedback" class="promo-feedback"></div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SCREEN 5: PRO PARTNER MODE
+           ========================================== -->
+      <section class="app-page" id="page-partner">
+        <div class="section-title">👷 Sifto Pro Partner Console</div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="pro-stat-earnings">₹0</div>
+            <div class="stat-label">Pro Earnings</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="pro-stat-active">0</div>
+            <div class="stat-label">Assigned Jobs</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="pro-stat-rating">4.9★</div>
+            <div class="stat-label">Avg Rating</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">Live Incoming Customer Jobs:</div>
+          <div class="bookings-list" id="partner-jobs-list">
+            <div class="empty-state">No customer bookings yet. Create a booking on the Book tab to dispatch it here!</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- RECEIPT MODAL OVERLAY -->
+    <div class="modal-backdrop" id="receipt-modal">
+      <div class="receipt-modal-box">
+        <div class="receipt-header">
+          <div class="section-title" style="margin-bottom: 0;">🧾 Official Sifto Receipt</div>
+          <button class="receipt-btn" onclick="closeReceiptModal()">Close ✕</button>
+        </div>
+        <div class="receipt-body" id="receipt-modal-content"></div>
+        <div class="promo-feedback" id="copy-receipt-feedback"></div>
+        <button class="book-btn" style="padding: 12px;" onclick="copyReceiptText()">
+          Copy Receipt to Clipboard 📋
+        </button>
+      </div>
+    </div>
+
+    <!-- STICKY BOTTOM NAVIGATION BAR (5 TABS) -->
+    <nav class="bottom-nav">
+      <button class="nav-tab active-nav" id="nav-book" onclick="switchPage('book')">
+        <span class="nav-icon">🏠</span>
+        <span>Book</span>
+      </button>
+      <button class="nav-tab" id="nav-track" onclick="switchPage('track')">
+        <span class="nav-icon">🛵</span>
+        <span>Live Track</span>
+      </button>
+      <button class="nav-tab" id="nav-bookings" onclick="switchPage('bookings')">
+        <span class="nav-icon">📋</span>
+        <span>Bookings</span>
+        <span class="nav-badge" id="nav-bookings-badge">0</span>
+      </button>
+      <button class="nav-tab" id="nav-wallet" onclick="switchPage('wallet')">
+        <span class="nav-icon">💰</span>
+        <span>Wallet</span>
+      </button>
+      <button class="nav-tab" id="nav-partner" onclick="switchPage('partner')">
+        <span class="nav-icon">👷</span>
+        <span>Pro Mode</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ==========================================
+       PART 3: JavaScript (Custom Chores, Address Book & Core Logic)
+       ========================================== -->
+  <script>
+    let currentService = "Home Cleaning";
+    let currentPrice = 199;
+    let currentEta = "15 mins";
+    let currentHours = 1;
+    let selectedFrequency = "One-Time";
+    let selectedProPreference = "Auto-Assign";
+    let selectedPaymentMethod = "UPI — GPay / PhonePe";
+    let activePromoCode = "";
+    let discountAmount = 0;
+
+    let walletBalance = 500;
+    let currentFilter = "ALL";
+    let isDarkMode = false;
+    let currentWizardStep = 1;
+
+    let trackedBookingId = null;
+    let trackerStageIndex = 0;
+    let trackerTimer = null;
+    let chatReplyTimer = null;
+    let activeReceiptPlainText = "";
+
+    const TRACKER_MESSAGES = [
+      "Pro confirmed your booking and packed supplies.",
+      "🛵 Pro is on the way (~8 mins away via Jubilee Hills Rd).",
+      "🏠 Pro has arrived at your doorstep! Share OTP to begin.",
+      "🧹 Chore is underway! Mark Done in Bookings when finished."
+    ];
+
+    const STORAGE_KEY = "sifto_saved_bookings_v1";
+    const WALLET_KEY = "sifto_wallet_balance_v1";
+    const THEME_KEY = "sifto_theme_dark_v1";
+    const CUSTOM_CHORES_KEY = "sifto_custom_chores_v1";
+    let activeBookings = [];
+    let customChores = [];
+
+    function goWizardStep(stepNum) {
+      currentWizardStep = stepNum;
+      for (let i = 1; i <= 3; i++) {
+        const pane = document.getElementById("wiz-pane-" + i);
+        const tab = document.getElementById("wiz-tab-" + i);
+        if (i === stepNum) {
+          pane.classList.add("active-pane");
+          tab.classList.add("active-wizard");
+        } else {
+          pane.classList.remove("active-pane");
+          tab.classList.remove("active-wizard");
+        }
+      }
+      updateSummaryBar();
+    }
+
+    function switchPage(pageName) {
+      const pages = ["book", "track", "bookings", "wallet", "partner"];
+      pages.forEach(p => {
+        const pageEl = document.getElementById("page-" + p);
+        const navEl = document.getElementById("nav-" + p);
+        if (p === pageName) {
+          pageEl.classList.add("active-page");
+          navEl.classList.add("active-nav");
+        } else {
+          pageEl.classList.remove("active-page");
+          navEl.classList.remove("active-nav");
+        }
+      });
+    }
+
+    // NEW IN STEP 9: Adds a user-created custom chore card to the Service Grid
+    function createCustomChoreCard(chore) {
+      const grid = document.getElementById("service-grid");
+      if (!grid) return null;
+
+      const btn = document.createElement("button");
+      btn.className = "service-card";
+      btn.innerHTML =
+        '<span class="service-icon">' + chore.icon + '</span>' +
+        '<span class="service-name">' + chore.name + '</span>' +
+        '<span class="service-meta">Custom Sifto service</span>' +
+        '<span class="service-price">₹' + chore.price + ' / hr</span>';
+      btn.addEventListener("click", function() {
+        selectService(btn, chore.name, chore.price, "15 mins");
+      });
+      grid.appendChild(btn);
+      return btn;
+    }
+
+    function addCustomChore() {
+      const iconEl = document.getElementById("custom-chore-icon");
+      const nameEl = document.getElementById("custom-chore-name");
+      const priceEl = document.getElementById("custom-chore-price");
+      const feedbackEl = document.getElementById("custom-chore-feedback");
+
+      const name = nameEl.value.trim();
+      const price = parseInt(priceEl.value, 10) || 159;
+      const icon = iconEl.value || "🪴";
+
+      if (!name) {
+        feedbackEl.className = "promo-feedback error";
+        feedbackEl.textContent = "Please enter a name for your custom chore (e.g. Balcony Garden).";
+        nameEl.focus();
+        return;
+      }
+
+      const newChore = { icon: icon, name: name, price: Math.max(49, price) };
+      customChores.push(newChore);
+      try {
+        localStorage.setItem(CUSTOM_CHORES_KEY, JSON.stringify(customChores));
+      } catch (e) {}
+
+      const newBtn = createCustomChoreCard(newChore);
+      if (newBtn) {
+        selectService(newBtn, newChore.name, newChore.price, "15 mins");
+      }
+
+      nameEl.value = "";
+      feedbackEl.className = "promo-feedback success";
+      feedbackEl.textContent = "✨ Added '" + newChore.name + "' (₹" + newChore.price + "/hr) and selected it!";
+    }
+
+    // NEW IN STEP 9: Switches between saved addresses with 1 tap
+    function selectSavedAddress(clickedPill, addressText) {
+      const allPills = document.querySelectorAll(".address-pill");
+      allPills.forEach(p => p.classList.remove("selected"));
+      clickedPill.classList.add("selected");
+
+      const addressInput = document.getElementById("address-input");
+      addressInput.value = addressText;
+    }
+
+    // NEW IN STEP 9: Saves whatever address is typed in the box as a new 1-tap pill
+    function saveCurrentAddressToBook() {
+      const addressInput = document.getElementById("address-input");
+      const text = addressInput.value.trim();
+      if (!text) return;
+
+      const row = document.getElementById("address-book-row");
+      const allPills = document.querySelectorAll(".address-pill");
+      allPills.forEach(p => p.classList.remove("selected"));
+
+      const pill = document.createElement("button");
+      pill.className = "address-pill selected";
+      const shortLabel = text.length > 22 ? text.slice(0, 22) + "…" : text;
+      pill.textContent = "📍 " + shortLabel;
+      pill.addEventListener("click", function() {
+        selectSavedAddress(pill, text);
+      });
+      row.appendChild(pill);
+    }
+
+    function loadSavedBookings() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          activeBookings = JSON.parse(raw);
+        }
+        const savedWallet = localStorage.getItem(WALLET_KEY);
+        if (savedWallet !== null) {
+          walletBalance = parseInt(savedWallet, 10) || 0;
+        }
+        const savedTheme = localStorage.getItem(THEME_KEY);
+        if (savedTheme === "true") {
+          isDarkMode = true;
+          document.body.classList.add("dark-mode");
+          document.getElementById("theme-toggle-btn").textContent = "☀️ Light Mode";
+        }
+        const savedChores = localStorage.getItem(CUSTOM_CHORES_KEY);
+        if (savedChores) {
+          customChores = JSON.parse(savedChores);
+          customChores.forEach(c => createCustomChoreCard(c));
+        }
+      } catch (e) {
+        activeBookings = [];
+      }
+      updateWalletDisplay();
+      renderBookings();
+    }
+
+    function saveBookingsToStorage() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(activeBookings));
+        localStorage.setItem(WALLET_KEY, String(walletBalance));
+      } catch (e) {}
+    }
+
+    function toggleDarkMode() {
+      isDarkMode = !isDarkMode;
+      document.body.classList.toggle("dark-mode", isDarkMode);
+      const btn = document.getElementById("theme-toggle-btn");
+      btn.textContent = isDarkMode ? "☀️ Light Mode" : "🌙 Dark Mode";
+      try {
+        localStorage.setItem(THEME_KEY, String(isDarkMode));
+      } catch (e) {}
+    }
+
+    function updateWalletDisplay() {
+      document.getElementById("wallet-balance").textContent = "₹" + walletBalance;
+      const statWallet = document.getElementById("stat-wallet-card");
+      if (statWallet) {
+        statWallet.textContent = "₹" + walletBalance;
+      }
+    }
+
+    function topUpWallet(amount) {
+      walletBalance += amount;
+      updateWalletDisplay();
+      saveBookingsToStorage();
+    }
+
+    function selectPayment(clickedCard, method) {
+      selectedPaymentMethod = method;
+      const allPaymentCards = document.querySelectorAll(".payment-card");
+      allPaymentCards.forEach(card => card.classList.remove("selected"));
+      clickedCard.classList.add("selected");
+    }
+
+    function selectFrequency(clickedPill, freq) {
+      selectedFrequency = freq;
+      const allPills = document.querySelectorAll(".plan-pill");
+      allPills.forEach(pill => pill.classList.remove("selected"));
+      clickedPill.classList.add("selected");
+      updateSummaryBar();
+    }
+
+    function setBookingFilter(clickedTab, filterType) {
+      currentFilter = filterType;
+      const allTabs = document.querySelectorAll(".filter-tab");
+      allTabs.forEach(tab => tab.classList.remove("selected"));
+      clickedTab.classList.add("selected");
+      renderBookings();
+    }
+
+    function calculateTotals() {
+      const subtotal = currentPrice * currentHours;
+      let discount = 0;
+
+      if (selectedFrequency === "Weekly Plan") {
+        discount += Math.round(subtotal * 0.15);
+      }
+
+      if (activePromoCode === "SIFTO50") {
+        discount += 50;
+      } else if (activePromoCode === "FIRST100" && currentHours >= 2) {
+        discount += 100;
+      }
+
+      discountAmount = discount;
+      const finalTotal = Math.max(49, subtotal - discountAmount);
+      return { subtotal, discount: discountAmount, finalTotal };
+    }
+
+    function updateSummaryBar() {
+      const totals = calculateTotals();
+      const hourLabel = currentHours === 1 ? "1 hr" : currentHours + " hrs";
+      const freqTag = selectedFrequency === "Weekly Plan" ? " · Weekly" : "";
+      document.getElementById("selected-name").textContent = currentService + " · " + hourLabel + freqTag;
+
+      const breakdownEl = document.getElementById("price-breakdown");
+      if (totals.discount > 0) {
+        breakdownEl.innerHTML =
+          "₹" + totals.subtotal + ' <span class="discount-tag">(-₹' + totals.discount + " saved)</span>";
+      } else {
+        breakdownEl.textContent = "₹" + currentPrice + " × " + hourLabel;
+      }
+
+      document.getElementById("selected-price").textContent = "₹" + totals.finalTotal;
+    }
+
+    function selectService(clickedCard, serviceName, price, eta) {
+      currentService = serviceName;
+      currentPrice = price;
+      currentEta = eta;
+
+      const allCards = document.querySelectorAll(".service-card");
+      allCards.forEach(card => card.classList.remove("selected"));
+      clickedCard.classList.add("selected");
+
+      updateSummaryBar();
+    }
+
+    function selectHours(clickedPill, hours) {
+      currentHours = hours;
+
+      const allPills = document.querySelectorAll(".hour-pill");
+      allPills.forEach(pill => pill.classList.remove("selected"));
+      clickedPill.classList.add("selected");
+
+      if (activePromoCode === "FIRST100") {
+        applyPromoCode();
+      } else {
+        updateSummaryBar();
+      }
+    }
+
+    function selectPro(clickedProCard, proName) {
+      selectedProPreference = proName;
+
+      const allProCards = document.querySelectorAll(".pro-card");
+      allProCards.forEach(card => card.classList.remove("selected"));
+      clickedProCard.classList.add("selected");
+    }
+
+    function addQuickNote(noteText) {
+      const notesInput = document.getElementById("notes-input");
+      if (!notesInput.value.trim()) {
+        notesInput.value = noteText;
+      } else if (notesInput.value.indexOf(noteText) === -1) {
+        notesInput.value = notesInput.value.trim() + " · " + noteText;
+      }
+    }
+
+    function quickFillPromo(code) {
+      document.getElementById("promo-input").value = code;
+      applyPromoCode();
+    }
+
+    function applyPromoCode() {
+      const inputEl = document.getElementById("promo-input");
+      const feedbackEl = document.getElementById("promo-feedback");
+      const code = inputEl.value.trim().toUpperCase();
+
+      if (!code) {
+        activePromoCode = "";
+        feedbackEl.className = "promo-feedback";
+        feedbackEl.textContent = "";
+        updateSummaryBar();
+        return;
+      }
+
+      if (code === "SIFTO50") {
+        activePromoCode = "SIFTO50";
+        feedbackEl.className = "promo-feedback success";
+        feedbackEl.textContent = "🎉 SIFTO50 applied! You saved ₹50 on this booking.";
+      } else if (code === "FIRST100") {
+        if (currentHours >= 2) {
+          activePromoCode = "FIRST100";
+          feedbackEl.className = "promo-feedback success";
+          feedbackEl.textContent = "🎉 FIRST100 applied! You saved ₹100 on your 2+ hour booking.";
+        } else {
+          activePromoCode = "";
+          feedbackEl.className = "promo-feedback error";
+          feedbackEl.textContent = "FIRST100 requires at least 2 hours. Tap 2 hrs on Step ① or use SIFTO50!";
+        }
+      } else {
+        activePromoCode = "";
+        feedbackEl.className = "promo-feedback error";
+        feedbackEl.textContent = "Invalid code. Try SIFTO50 or FIRST100.";
+      }
+
+      updateSummaryBar();
+    }
+
+    function renderChatMessages() {
+      const chatContainer = document.getElementById("chat-messages");
+      if (!chatContainer || !trackedBookingId) return;
+
+      const target = activeBookings.find(item => item.id === trackedBookingId);
+      if (!target) return;
+
+      const messages = target.messages || [];
+      chatContainer.innerHTML = "";
+      messages.forEach(msg => {
+        const bubble = document.createElement("div");
+        bubble.className = msg.role === "user" ? "chat-bubble user" : "chat-bubble pro";
+        bubble.innerHTML =
+          '<span class="chat-sender">' + msg.sender + '</span>' +
+          '<div>' + msg.text + '</div>';
+        chatContainer.appendChild(bubble);
+      });
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function sendChatMessage() {
+      const inputEl = document.getElementById("chat-input");
+      const text = inputEl.value.trim();
+      if (!text || !trackedBookingId) return;
+
+      inputEl.value = "";
+      appendMessageToBooking(trackedBookingId, "user", "You (Sifto)", text);
+
+      if (chatReplyTimer) {
+        clearTimeout(chatReplyTimer);
+      }
+      chatReplyTimer = setTimeout(function() {
+        const target = activeBookings.find(item => item.id === trackedBookingId);
+        if (!target) return;
+        const proName = target.pro || "Sifto Pro";
+        const replyText =
+          "Got your note, Sifto! I am on my way and will follow that instruction 👍";
+        appendMessageToBooking(trackedBookingId, "pro", proName, replyText);
+      }, 900);
+    }
+
+    function sendQuickChat(presetText) {
+      const inputEl = document.getElementById("chat-input");
+      inputEl.value = presetText;
+      sendChatMessage();
+    }
+
+    function appendMessageToBooking(bookingId, role, sender, text) {
+      activeBookings = activeBookings.map(item => {
+        if (item.id === bookingId) {
+          const existing = item.messages ? item.messages.slice() : [];
+          existing.push({ role: role, sender: sender, text: text });
+          return Object.assign({}, item, { messages: existing });
+        }
+        return item;
+      });
+      saveBookingsToStorage();
+      renderChatMessages();
+    }
+
+    function openReceiptModal(bookingId) {
+      const target = activeBookings.find(item => item.id === bookingId);
+      if (!target) return;
+
+      const modal = document.getElementById("receipt-modal");
+      const content = document.getElementById("receipt-modal-content");
+      const feedback = document.getElementById("copy-receipt-feedback");
+      feedback.className = "promo-feedback";
+      feedback.textContent = "";
+
+      const freq = target.frequency || "One-Time";
+      const saved = target.discount || 0;
+      const payMethod = target.payment || "UPI — GPay / PhonePe";
+
+      content.innerHTML =
+        "<strong>Booking ID:</strong> #" + target.id + "<br>" +
+        "<strong>Customer:</strong> Sifto<br>" +
+        "<strong>Service:</strong> " + target.service + " (" + target.hours + " hr · " + freq + ")<br>" +
+        "<strong>Assigned Pro:</strong> " + target.pro + "<br>" +
+        "<strong>Address:</strong> " + target.address + "<br>" +
+        "<strong>Slot:</strong> " + target.slot + "<br>" +
+        "<strong>Payment Mode:</strong> " + payMethod + "<br>" +
+        "<strong>Discount Saved:</strong> ₹" + saved + "<br>" +
+        "<strong>Total Paid:</strong> ₹" + target.total + " (" + (target.status || "Active") + ")";
+
+      activeReceiptPlainText =
+        "SIFTO OFFICIAL RECEIPT (#" + target.id + ")\n" +
+        "Service: " + target.service + " (" + target.hours + " hr · " + freq + ")\n" +
+        "Pro: " + target.pro + "\n" +
+        "Address: " + target.address + " (" + target.slot + ")\n" +
+        "Payment: " + payMethod + " | Saved: ₹" + saved + "\n" +
+        "Total: ₹" + target.total;
+
+      modal.classList.add("visible");
+    }
+
+    function closeReceiptModal() {
+      document.getElementById("receipt-modal").classList.remove("visible");
+    }
+
+    function copyReceiptText() {
+      const feedback = document.getElementById("copy-receipt-feedback");
+      try {
+        const temp = document.createElement("textarea");
+        temp.value = activeReceiptPlainText;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+      } catch (e) {}
+      feedback.className = "promo-feedback success";
+      feedback.textContent = "✅ Receipt copied to your clipboard!";
+    }
+
+    function startLiveTracker(booking) {
+      trackedBookingId = booking.id;
+      trackerStageIndex = booking.stage || 0;
+
+      if (trackerTimer) {
+        clearInterval(trackerTimer);
+        trackerTimer = null;
+      }
+
+      document.getElementById("no-tracker-empty").style.display = "none";
+      document.getElementById("live-tracker-card").classList.add("visible");
+      document.getElementById("chat-card").classList.add("visible");
+      document.getElementById("tracker-pro-title").textContent = "🛵 Tracking " + booking.pro + " (#" + booking.id + ")";
+      document.getElementById("chat-header-title").textContent = "💬 Chat with " + booking.pro;
+      document.getElementById("tracker-otp").textContent = "Start OTP: " + (booking.otp || "4829");
+      renderTrackerStage();
+      renderChatMessages();
+
+      switchPage("track");
+
+      trackerTimer = setInterval(function() {
+        if (trackerStageIndex < 3) {
+          advanceTrackerStage();
+        } else {
+          clearInterval(trackerTimer);
+          trackerTimer = null;
+        }
+      }, 6000);
+    }
+
+    function renderTrackerStage() {
+      const widths = ["25%", "50%", "75%", "100%"];
+      document.getElementById("tracker-bar-fill").style.width = widths[trackerStageIndex] || "25%";
+      document.getElementById("tracker-status-text").textContent = TRACKER_MESSAGES[trackerStageIndex];
+
+      for (let i = 0; i < 4; i++) {
+        const stepEl = document.getElementById("stage-" + i);
+        if (i <= trackerStageIndex) {
+          stepEl.classList.add("active");
+        } else {
+          stepEl.classList.remove("active");
+        }
+      }
+
+      const btn = document.getElementById("advance-stage-btn");
+      if (trackerStageIndex >= 3) {
+        btn.textContent = "In Progress ✓";
+      } else {
+        btn.textContent = "Next Stage ▶";
+      }
+    }
+
+    function advanceTrackerStage() {
+      if (trackerStageIndex < 3) {
+        trackerStageIndex += 1;
+      }
+      if (trackedBookingId) {
+        activeBookings = activeBookings.map(item => {
+          if (item.id === trackedBookingId) {
+            return Object.assign({}, item, { stage: trackerStageIndex });
+          }
+          return item;
+        });
+        saveBookingsToStorage();
+      }
+      renderTrackerStage();
+      renderPartnerConsole();
+    }
+
+    function partnerAdvanceJob(bookingId) {
+      activeBookings = activeBookings.map(item => {
+        if (item.id === bookingId) {
+          const nextStage = Math.min(3, (item.stage || 0) + 1);
+          if (trackedBookingId === bookingId) {
+            trackerStageIndex = nextStage;
+            renderTrackerStage();
+          }
+          return Object.assign({}, item, { stage: nextStage });
+        }
+        return item;
+      });
+      saveBookingsToStorage();
+      renderBookings();
+    }
+
+    function bookSiftoPro() {
+      const addressInput = document.getElementById("address-input");
+      const slotInput = document.getElementById("slot-input");
+      const notesInput = document.getElementById("notes-input");
+      const errorBox = document.getElementById("address-error");
+      const address = addressInput.value.trim();
+      const note = notesInput.value.trim();
+
+      if (!address) {
+        errorBox.textContent = "Please enter your flat/house address on Step ② before booking.";
+        errorBox.classList.add("visible");
+        goWizardStep(2);
+        addressInput.focus();
+        return;
+      }
+
+      const totals = calculateTotals();
+
+      if (selectedPaymentMethod === "Sifto Wallet") {
+        if (walletBalance < totals.finalTotal) {
+          errorBox.textContent =
+            "Insufficient Sifto Wallet balance (₹" + walletBalance + "). Tap '+ Add ₹200' at the top or choose UPI!";
+          errorBox.classList.add("visible");
+          return;
+        }
+        walletBalance -= totals.finalTotal;
+        updateWalletDisplay();
+      }
+
+      errorBox.classList.remove("visible");
+
+      const pros = ["Ananya R. (⭐ 4.9)", "Kavitha M. (⭐ 4.9)", "Ramesh K. (⭐ 4.8)", "Priya S. (⭐ 4.9)"];
+      const assignedPro =
+        selectedProPreference === "Auto-Assign"
+          ? pros[Math.floor(Math.random() * pros.length)]
+          : selectedProPreference;
+
+      const bookingId = "SFT-" + Math.floor(1000 + Math.random() * 9000);
+      const otpCode = String(Math.floor(1000 + Math.random() * 9000));
+      const chosenSlot = slotInput.value;
+
+      const initialMessages = [
+        {
+          role: "pro",
+          sender: assignedPro,
+          text: "Hi Sifto! I have accepted your " + currentService + " booking (#" + bookingId + "). See you soon!"
+        }
+      ];
+
+      const newBooking = {
+        id: bookingId,
+        otp: otpCode,
+        service: currentService,
+        frequency: selectedFrequency,
+        hours: currentHours,
+        total: totals.finalTotal,
+        discount: totals.discount,
+        pro: assignedPro,
+        payment: selectedPaymentMethod,
+        address: address,
+        slot: chosenSlot,
+        note: note,
+        stage: 0,
+        rating: 0,
+        messages: initialMessages,
+        status: "Active"
+      };
+      activeBookings.unshift(newBooking);
+      saveBookingsToStorage();
+
+      const details = document.getElementById("confirm-details");
+      const discountLine =
+        totals.discount > 0 ? " (Saved ₹" + totals.discount + ")" : "";
+      const noteLine = note ? "<br><strong>Note:</strong> " + note : "";
+      details.innerHTML =
+        "<strong>Service:</strong> " + currentService + " · " + selectedFrequency + " (" + currentHours + " hr · ₹" + totals.finalTotal + ")" + discountLine + "<br>" +
+        "<strong>Sifto Pro:</strong> " + assignedPro + "<br>" +
+        "<strong>Payment:</strong> " + selectedPaymentMethod + "<br>" +
+        "<strong>When & Where:</strong> " + chosenSlot + " → " + address +
+        noteLine + "<br>" +
+        "<strong>Booking ID:</strong> #" + bookingId + " · <strong>OTP:</strong> " + otpCode;
+
+      document.getElementById("confirmation-box").classList.add("visible");
+      notesInput.value = "";
+      goWizardStep(1);
+
+      startLiveTracker(newBooking);
+      renderBookings();
+    }
+
+    function completeBooking(bookingId) {
+      activeBookings = activeBookings.map(item => {
+        if (item.id === bookingId) {
+          return Object.assign({}, item, { status: "Completed ✅", stage: 3 });
+        }
+        return item;
+      });
+      if (trackedBookingId === bookingId) {
+        if (trackerTimer) {
+          clearInterval(trackerTimer);
+          trackerTimer = null;
+        }
+        document.getElementById("live-tracker-card").classList.remove("visible");
+        document.getElementById("chat-card").classList.remove("visible");
+      }
+      saveBookingsToStorage();
+      renderBookings();
+    }
+
+    function rateBooking(bookingId, stars) {
+      activeBookings = activeBookings.map(item => {
+        if (item.id === bookingId) {
+          return Object.assign({}, item, { rating: stars });
+        }
+        return item;
+      });
+      saveBookingsToStorage();
+      renderBookings();
+    }
+
+    // NEW IN STEP 10: 1-Tap Rebook for any past booking
+    function rebookBooking(bookingId) {
+      const target = activeBookings.find(item => item.id === bookingId);
+      if (!target) return;
+
+      const newBookingId = "SFT-" + Math.floor(1000 + Math.random() * 9000);
+      const newOtp = String(Math.floor(1000 + Math.random() * 9000));
+      const cloned = Object.assign({}, target, {
+        id: newBookingId,
+        otp: newOtp,
+        stage: 0,
+        rating: 0,
+        status: "Active",
+        messages: [
+          {
+            role: "pro",
+            sender: target.pro,
+            text: "Hi Sifto! Your repeat booking (#" + newBookingId + ") is confirmed. On my way!"
+          }
+        ]
+      });
+      activeBookings.unshift(cloned);
+      saveBookingsToStorage();
+      startLiveTracker(cloned);
+      renderBookings();
+    }
+
+    function exportBookingsJson() {
+      const feedback = document.getElementById("data-feedback");
+      const payload = JSON.stringify({ walletBalance: walletBalance, bookings: activeBookings, customChores: customChores }, null, 2);
+      try {
+        const temp = document.createElement("textarea");
+        temp.value = payload;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand("copy");
+        document.body.removeChild(temp);
+      } catch (e) {}
+      feedback.className = "promo-feedback success";
+      feedback.textContent = "✅ Copied full database JSON (" + activeBookings.length + " bookings) to clipboard!";
+    }
+
+    function resetDemoData() {
+      activeBookings = [];
+      customChores = [];
+      walletBalance = 500;
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(WALLET_KEY);
+        localStorage.removeItem(CUSTOM_CHORES_KEY);
+      } catch (e) {}
+      updateWalletDisplay();
+      renderBookings();
+      const feedback = document.getElementById("data-feedback");
+      feedback.className = "promo-feedback success";
+      feedback.textContent = "🔄 App data reset to fresh ₹500 wallet balance.";
+    }
+
+    function cancelBooking(bookingId) {
+      const target = activeBookings.find(item => item.id === bookingId);
+      const isDone = target && target.status && target.status.indexOf("Completed") !== -1;
+      if (target && !isDone && target.payment === "Sifto Wallet") {
+        walletBalance += target.total;
+        updateWalletDisplay();
+      }
+
+      activeBookings = activeBookings.filter(item => item.id !== bookingId);
+      if (trackedBookingId === bookingId) {
+        if (trackerTimer) {
+          clearInterval(trackerTimer);
+          trackerTimer = null;
+        }
+        document.getElementById("live-tracker-card").classList.remove("visible");
+        document.getElementById("chat-card").classList.remove("visible");
+      }
+      saveBookingsToStorage();
+      renderBookings();
+    }
+
+    function renderPartnerConsole() {
+      const partnerList = document.getElementById("partner-jobs-list");
+      const earningsEl = document.getElementById("pro-stat-earnings");
+      const activeJobsEl = document.getElementById("pro-stat-active");
+      const ratingEl = document.getElementById("pro-stat-rating");
+      if (!partnerList) return;
+
+      const completedJobs = activeBookings.filter(b => b.status && b.status.indexOf("Completed") !== -1);
+      const activeJobs = activeBookings.filter(b => !b.status || b.status.indexOf("Completed") === -1);
+      const totalEarnings = completedJobs.reduce((sum, b) => sum + (b.total || 0), 0);
+
+      const ratedJobs = completedJobs.filter(b => b.rating && b.rating > 0);
+      const avgRating =
+        ratedJobs.length > 0
+          ? (ratedJobs.reduce((sum, b) => sum + b.rating, 0) / ratedJobs.length).toFixed(1) + "★"
+          : "4.9★";
+
+      if (earningsEl) earningsEl.textContent = "₹" + totalEarnings;
+      if (activeJobsEl) activeJobsEl.textContent = String(activeJobs.length);
+      if (ratingEl) ratingEl.textContent = avgRating;
+
+      if (activeBookings.length === 0) {
+        partnerList.innerHTML =
+          '<div class="empty-state">No customer bookings yet. Create a booking on the Book tab to dispatch it here!</div>';
+        return;
+      }
+
+      const stageNames = ["1. Assigned", "2. En Route 🛵", "3. At Door 🏠", "4. Working 🧹"];
+      partnerList.innerHTML = "";
+      activeBookings.forEach(item => {
+        const isDone = item.status && item.status.indexOf("Completed") !== -1;
+        const card = document.createElement("div");
+        card.className = isDone ? "booking-item completed" : "booking-item";
+
+        const info = document.createElement("div");
+        info.className = "booking-item-info";
+        const stageLabel = isDone ? "✅ Completed (Earned ₹" + item.total + ")" : stageNames[item.stage || 0];
+        info.innerHTML =
+          '<div class="booking-item-title">' + item.service + ' · ₹' + item.total + ' (' + item.hours + ' hr)</div>' +
+          '<div class="booking-item-sub">Assigned Pro: ' + item.pro + ' · OTP: ' + (item.otp || "4829") + '</div>' +
+          '<div class="booking-item-sub">📍 ' + item.address + ' · Status: <strong>' + stageLabel + '</strong></div>';
+
+        const actions = document.createElement("div");
+        actions.className = "booking-actions";
+
+        if (!isDone) {
+          if ((item.stage || 0) < 3) {
+            const stepBtn = document.createElement("button");
+            stepBtn.className = "track-btn";
+            stepBtn.textContent = "Advance Stage ▶";
+            stepBtn.addEventListener("click", function() {
+              partnerAdvanceJob(item.id);
+            });
+            actions.appendChild(stepBtn);
+          }
+
+          const finishBtn = document.createElement("button");
+          finishBtn.className = "done-btn";
+          finishBtn.textContent = "Complete Job ✅";
+          finishBtn.addEventListener("click", function() {
+            completeBooking(item.id);
+          });
+          actions.appendChild(finishBtn);
+        }
+
+        card.appendChild(info);
+        card.appendChild(actions);
+        partnerList.appendChild(card);
+      });
+    }
+
+    function renderBookings() {
+      const listContainer = document.getElementById("bookings-list");
+      const countBadge = document.getElementById("booking-count");
+      const navBadge = document.getElementById("nav-bookings-badge");
+      const searchInput = document.getElementById("search-bookings-input");
+      const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+
+      countBadge.textContent = activeBookings.length + " saved";
+      if (navBadge) {
+        navBadge.textContent = String(activeBookings.length);
+      }
+
+      const statTotal = document.getElementById("stat-total-bookings");
+      const statSaved = document.getElementById("stat-total-saved");
+      if (statTotal) statTotal.textContent = String(activeBookings.length);
+      if (statSaved) {
+        const totalSaved = activeBookings.reduce((sum, b) => sum + (b.discount || 0), 0);
+        statSaved.textContent = "₹" + totalSaved;
+      }
+
+      renderPartnerConsole();
+
+      const filtered = activeBookings.filter(item => {
+        const isDone = item.status && item.status.indexOf("Completed") !== -1;
+        if (currentFilter === "ACTIVE" && isDone) return false;
+        if (currentFilter === "COMPLETED" && !isDone) return false;
+
+        if (query) {
+          const haystack = (
+            (item.service || "") + " " +
+            (item.pro || "") + " " +
+            (item.address || "") + " " +
+            (item.id || "") + " " +
+            (item.note || "")
+          ).toLowerCase();
+          return haystack.indexOf(query) !== -1;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        listContainer.innerHTML =
+          '<div class="empty-state">No matching bookings found.</div>';
+        return;
+      }
+
+      listContainer.innerHTML = "";
+      filtered.forEach(item => {
+        const row = document.createElement("div");
+        const isDone = item.status && item.status.indexOf("Completed") !== -1;
+        row.className = isDone ? "booking-item completed" : "booking-item";
+
+        const info = document.createElement("div");
+        info.className = "booking-item-info";
+        const statusBadge = isDone ? " · ✅ Completed" : " · 🟢 Active";
+        const noteHtml = item.note ? '<div><span class="booking-note-tag">📝 ' + item.note + '</span></div>' : "";
+        const paymentLabel = item.payment ? " · 💳 " + item.payment : "";
+        const freqLabel = item.frequency === "Weekly Plan" ? " · 📅 Weekly" : "";
+
+        info.innerHTML =
+          '<div class="booking-item-title">' + item.service + ' (' + item.hours + ' hr · ₹' + item.total + ')' + freqLabel + statusBadge + '</div>' +
+          '<div class="booking-item-sub">Pro: ' + item.pro + ' · ' + item.slot + '</div>' +
+          '<div class="booking-item-sub">📍 ' + item.address + ' · #' + item.id + paymentLabel + '</div>' +
+          noteHtml;
+
+        if (isDone) {
+          const ratingRow = document.createElement("div");
+          ratingRow.className = "rating-row";
+          const label = document.createElement("span");
+          label.className = "rating-label";
+          label.textContent = item.rating ? "Your Rating:" : "Rate Pro:";
+          ratingRow.appendChild(label);
+
+          for (let s = 1; s <= 5; s++) {
+            const starBtn = document.createElement("button");
+            starBtn.className = (item.rating && s <= item.rating) ? "star-btn rated" : "star-btn";
+            starBtn.textContent = s + "★";
+            starBtn.addEventListener("click", function() {
+              rateBooking(item.id, s);
+            });
+            ratingRow.appendChild(starBtn);
+          }
+          info.appendChild(ratingRow);
+        }
+
+        const actions = document.createElement("div");
+        actions.className = "booking-actions";
+
+        if (!isDone) {
+          const trackBtn = document.createElement("button");
+          trackBtn.className = "track-btn";
+          trackBtn.textContent = "Track Live 📍";
+          trackBtn.addEventListener("click", function() {
+            startLiveTracker(item);
+          });
+          actions.appendChild(trackBtn);
+
+          const doneBtn = document.createElement("button");
+          doneBtn.className = "done-btn";
+          doneBtn.textContent = "Mark Done";
+          doneBtn.addEventListener("click", function() {
+            completeBooking(item.id);
+          });
+          actions.appendChild(doneBtn);
+        }
+
+        if (isDone) {
+          const rebookBtn = document.createElement("button");
+          rebookBtn.className = "track-btn";
+          rebookBtn.textContent = "Rebook 🔄";
+          rebookBtn.addEventListener("click", function() {
+            rebookBooking(item.id);
+          });
+          actions.appendChild(rebookBtn);
+        }
+
+        const receiptBtn = document.createElement("button");
+        receiptBtn.className = "receipt-btn";
+        receiptBtn.textContent = "Receipt 🧾";
+        receiptBtn.addEventListener("click", function() {
+          openReceiptModal(item.id);
+        });
+        actions.appendChild(receiptBtn);
+
+        const cancelBtn = document.createElement("button");
+        cancelBtn.className = "cancel-btn";
+        cancelBtn.textContent = isDone ? "Remove" : "Cancel";
+        cancelBtn.addEventListener("click", function() {
+          cancelBooking(item.id);
+        });
+        actions.appendChild(cancelBtn);
+
+        row.appendChild(info);
+        row.appendChild(actions);
+        listContainer.appendChild(row);
+      });
+    }
+
+    loadSavedBookings();
+  </script>
+</body>
+</html>

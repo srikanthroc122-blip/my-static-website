@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sifto — Production-Ready App (Step 10)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ==========================================
+       PART 1: HTML (Custom Chore Creator + Saved Address Book)
+       ========================================== -->
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="header-top-row">
+        <span class="badge">🚀 Step 10: Complete App + Rebook & Cloud-Ready</span>
+        <button class="theme-btn" id="theme-toggle-btn" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+      </div>
+      <h1>Sifto</h1>
+      <p>Hi Sifto! Create custom chores and switch between saved Hyderabad addresses.</p>
+      <div class="wallet-bar">
+        <div class="wallet-info">💰 Sifto Wallet: <span id="wallet-balance">₹500</span></div>
+        <button class="wallet-topup-btn" onclick="topUpWallet(200)">+ Add ₹200</button>
+      </div>
+    </header>
+
+    <main class="app-body">
+      <!-- ==========================================
+           SCREEN 1: BOOK A PRO (3-STEP WIZARD)
+           ========================================== -->
+      <section class="app-page active-page" id="page-book">
+        <div class="wizard-stepper">
+          <button class="wizard-pill active-wizard" id="wiz-tab-1" onclick="goWizardStep(1)">① Chore & Hours</button>
+          <button class="wizard-pill" id="wiz-tab-2" onclick="goWizardStep(2)">② Pro & Address</button>
+          <button class="wizard-pill" id="wiz-tab-3" onclick="goWizardStep(3)">③ Pay & Book</button>
+        </div>
+
+        <!-- WIZARD PANE 1: Chore, Custom Chore Builder & Duration -->
+        <div class="wizard-pane active-pane" id="wiz-pane-1">
+          <div>
+            <div class="section-title">1. Tap a chore to select it:</div>
+            <div class="service-grid" id="service-grid">
+              <button class="service-card selected" onclick="selectService(this, 'Home Cleaning', 199, '15 mins')">
+                <span class="service-icon">🧹</span>
+                <span class="service-name">Home Cleaning</span>
+                <span class="service-meta">Sweeping & mopping</span>
+                <span class="service-price">₹199 / hr</span>
+              </button>
+
+              <button class="service-card" onclick="selectService(this, 'Kitchen Prep', 179, '12 mins')">
+                <span class="service-icon">🥗</span>
+                <span class="service-name">Kitchen Prep</span>
+                <span class="service-meta">Chopping & kneading</span>
+                <span class="service-price">₹179 / hr</span>
+              </button>
+
+              <button class="service-card" onclick="selectService(this, 'Laundry Care', 149, '18 mins')">
+                <span class="service-icon">👕</span>
+                <span class="service-name">Laundry Care</span>
+                <span class="service-meta">Wash, fold & iron</span>
+                <span class="service-price">₹149 / hr</span>
+              </button>
+
+              <button class="service-card" onclick="selectService(this, 'Utensil Wash', 129, '10 mins')">
+                <span class="service-icon">🍽️</span>
+                <span class="service-name">Utensil Wash</span>
+                <span class="service-meta">Sink & counter reset</span>
+                <span class="service-price">₹129 / hr</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- NEW IN STEP 9: Add Your Own Custom Chore -->
+          <div class="custom-chore-box">
+            <div class="section-title" style="margin-bottom: 0;">✨ Add Your Own Custom Chore:</div>
+            <div class="custom-chore-row">
+              <select id="custom-chore-icon" class="select-input" style="width: 74px; padding: 8px;">
+                <option value="🪴">🪴</option>
+                <option value="🚗">🚗</option>
+                <option value="🪟">🪟</option>
+                <option value="🐾">🐾</option>
+                <option value="📦">📦</option>
+              </select>
+              <input
+                type="text"
+                id="custom-chore-name"
+                class="text-input"
+                placeholder="Chore name (e.g. Balcony Garden)"
+              />
+              <input
+                type="number"
+                id="custom-chore-price"
+                class="text-input"
+                style="width: 88px;"
+                placeholder="₹/hr"
+                value="159"
+              />
+              <button class="apply-btn" onclick="addCustomChore()">+ Add</button>
+            </div>
+            <div id="custom-chore-feedback" class="promo-feedback"></div>
+          </div>
+
+          <div>
+            <div class="section-title">2. Frequency & duration:</div>
+            <div class="plan-toggle-row">
+              <button class="plan-pill selected" onclick="selectFrequency(this, 'One-Time')">⚡ One-Time Visit</button>
+              <button class="plan-pill" onclick="selectFrequency(this, 'Weekly Plan')">📅 Weekly Plan (15% OFF)</button>
+            </div>
+            <div class="hours-row">
+              <button class="hour-pill selected" onclick="selectHours(this, 1)">1 hr</button>
+              <button class="hour-pill" onclick="selectHours(this, 2)">2 hrs</button>
+              <button class="hour-pill" onclick="selectHours(this, 3)">3 hrs</button>
+              <button class="hour-pill" onclick="selectHours(this, 4)">4 hrs</button>
+            </div>
+          </div>
+
+          <div class="wizard-nav-row">
+            <button class="primary-next-btn" onclick="goWizardStep(2)">Next: Pro & Address →</button>
+          </div>
+        </div>
+
+        <!-- WIZARD PANE 2: Pro & Saved Address Book -->
+        <div class="wizard-pane" id="wiz-pane-2">
+          <div>
+            <div class="section-title">3. Choose your Sifto Pro:</div>
+            <div class="pro-list">
+              <button class="pro-card selected" onclick="selectPro(this, 'Auto-Assign')">
+                <span class="pro-name">⚡ Auto-Assign</span>
+                <span class="pro-sub">Fastest nearby Pro</span>
+              </button>
+              <button class="pro-card" onclick="selectPro(this, 'Ananya R. (⭐ 4.9)')">
+                <span class="pro-name">👩🏽‍🔧 Ananya R. ⭐ 4.9</span>
+                <span class="pro-sub">Deep Clean · 340+ jobs</span>
+              </button>
+              <button class="pro-card" onclick="selectPro(this, 'Kavitha M. (⭐ 4.9)')">
+                <span class="pro-name">👩🏽‍🍳 Kavitha M. ⭐ 4.9</span>
+                <span class="pro-sub">Kitchen Pro · 280+ jobs</span>
+              </button>
+              <button class="pro-card" onclick="selectPro(this, 'Ramesh K. (⭐ 4.8)')">
+                <span class="pro-name">👨🏽‍🔧 Ramesh K. ⭐ 4.8</span>
+                <span class="pro-sub">Laundry & Iron · 410+ jobs</span>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="section-title">4. Saved Address Book & arrival time:</div>
+            <!-- NEW IN STEP 9: 1-Tap Saved Address Pills -->
+            <div class="address-book-row" id="address-book-row">
+              <button class="address-pill selected" onclick="selectSavedAddress(this, 'Flat 302, Jubilee Hills')">
+                🏠 Home (Jubilee Hills)
+              </button>
+              <button class="address-pill" onclick="selectSavedAddress(this, 'Tower B, Mindspace, HITEC City')">
+                🏢 Office (HITEC City)
+              </button>
+              <button class="address-pill" onclick="selectSavedAddress(this, 'Plot 18, Road No. 12, Banjara Hills')">
+                👵 Parents (Banjara Hills)
+              </button>
+            </div>
+
+            <div class="input-group">
+              <div class="promo-row">
+                <input
+                  type="text"
+                  id="address-input"
+                  class="text-input"
+                  placeholder="Flat / House No., Building, Area (e.g. Flat 302, Madhapur)"
+                  value="Flat 302, Jubilee Hills"
+                />
+                <button class="apply-btn" onclick="saveCurrentAddressToBook()">Save 📍</button>
+              </div>
+              <select id="slot-input" class="select-input">
+                <option value="Instant (in ~15 mins)">⚡ Instant Arrival (in ~15 mins)</option>
+                <option value="Today, 5:00 PM">🕔 Today, 5:00 PM</option>
+                <option value="Today, 7:00 PM">🕖 Today, 7:00 PM</option>
+                <option value="Tomorrow, 9:00 AM">🕘 Tomorrow, 9:00 AM</option>
+              </select>
+              <input
+                type="text"
+                id="notes-input"
+                class="text-input"
+                placeholder="Optional note (e.g. Ring bell softly, use eco floor cleaner)"
+              />
+              <div class="note-chips">
+                <button class="note-chip" onclick="addQuickNote('🐾 Friendly pet at home')">+ 🐾 Pet at home</button>
+                <button class="note-chip" onclick="addQuickNote('🧴 Use eco floor cleaner')">+ 🧴 Eco cleaner</button>
+                <button class="note-chip" onclick="addQuickNote('🔕 Call on arrival, do not ring bell')">+ 🔕 Don't ring bell</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-nav-row">
+            <button class="secondary-btn" onclick="goWizardStep(1)">← Back</button>
+            <button class="primary-next-btn" onclick="goWizardStep(3)">Next: Payment →</button>
+          </div>
+        </div>
+
+        <!-- WIZARD PANE 3: Promo, Payment & Confirm -->
+        <div class="wizard-pane" id="wiz-pane-3">
+          <div>
+            <div class="section-title">5. Promo code & payment method:</div>
+            <div class="promo-row">
+              <input
+                type="text"
+                id="promo-input"
+                class="text-input"
+                placeholder="Enter code (e.g. SIFTO50)"
+              />
+              <button class="apply-btn" onclick="applyPromoCode()">Apply</button>
+            </div>
+            <div class="promo-chips">
+              <button class="promo-chip" onclick="quickFillPromo('SIFTO50')">🏷️ Tap to use SIFTO50 (₹50 OFF)</button>
+              <button class="promo-chip" onclick="quickFillPromo('FIRST100')">🎉 Tap to use FIRST100 (₹100 OFF on 2+ hrs)</button>
+            </div>
+            <div id="promo-feedback" class="promo-feedback"></div>
+
+            <div class="payment-grid" style="margin-top: 10px;">
+              <button class="payment-card selected" onclick="selectPayment(this, 'UPI — GPay / PhonePe')">
+                <span class="payment-name">📱 UPI Instant</span>
+                <span class="payment-sub">GPay, PhonePe, Paytm</span>
+              </button>
+              <button class="payment-card" onclick="selectPayment(this, 'Sifto Wallet')">
+                <span class="payment-name">💰 Sifto Wallet</span>
+                <span class="payment-sub">Instant 1-tap balance</span>
+              </button>
+              <button class="payment-card" onclick="selectPayment(this, 'Credit / Debit Card')">
+                <span class="payment-name">💳 Card</span>
+                <span class="payment-sub">Visa, RuPay, Mastercard</span>
+              </button>
+              <button class="payment-card" onclick="selectPayment(this, 'Cash After Service')">
+                <span class="payment-name">💵 Pay After Service</span>
+                <span class="payment-sub">Cash or QR at doorstep</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="address-error" class="error-msg">
+            Please enter your flat/house address before booking.
+          </div>
+
+          <div class="booking-bar">
+            <div>
+              <div class="booking-bar-label">Selected Plan</div>
+              <div class="booking-bar-value" id="selected-name">Home Cleaning · 1 hr</div>
+            </div>
+            <div style="text-align: right;">
+              <div class="booking-bar-label" id="price-breakdown">₹199 × 1 hr</div>
+              <div class="booking-bar-value" id="selected-price">₹199</div>
+            </div>
+          </div>
+
+          <div class="wizard-nav-row">
+            <button class="secondary-btn" onclick="goWizardStep(2)">← Back</button>
+            <button class="book-btn" style="flex: 2;" onclick="bookSiftoPro()">
+              Book a Sifto Pro Now →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SCREEN 2: LIVE PRO TRACKER + IN-APP CHAT
+           ========================================== -->
+      <section class="app-page" id="page-track">
+        <div class="section-title">🛵 Live Doorstep Tracker & Chat</div>
+
+        <div class="confirmation-card" id="confirmation-box">
+          <div class="confirmation-title" id="confirm-heading">✅ Sifto Pro Assigned!</div>
+          <div id="confirm-details"></div>
+        </div>
+
+        <div class="tracker-card" id="live-tracker-card">
+          <div class="tracker-header">
+            <div class="tracker-title" id="tracker-pro-title">🛵 Live Pro Tracker</div>
+            <span class="otp-pill" id="tracker-otp">Start OTP: 4829</span>
+          </div>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="tracker-bar-fill"></div>
+          </div>
+          <div class="tracker-steps">
+            <div class="tracker-step active" id="stage-0">1. Assigned</div>
+            <div class="tracker-step" id="stage-1">2. En Route</div>
+            <div class="tracker-step" id="stage-2">3. At Door</div>
+            <div class="tracker-step" id="stage-3">4. Working</div>
+          </div>
+          <div class="tracker-controls">
+            <div class="tracker-status-text" id="tracker-status-text">Pro confirmed your booking and packed supplies.</div>
+            <button class="step-btn" id="advance-stage-btn" onclick="advanceTrackerStage()">Next Stage ▶</button>
+          </div>
+        </div>
+
+        <!-- Live Customer <-> Pro Chat Box -->
+        <div class="chat-card" id="chat-card">
+          <div class="tracker-header" style="margin-bottom: 0;">
+            <div class="section-title" id="chat-header-title" style="margin-bottom: 0;">💬 Chat with Sifto Pro</div>
+            <span class="count-badge">Online 🟢</span>
+          </div>
+
+          <div class="chat-messages" id="chat-messages"></div>
+
+          <div class="note-chips">
+            <button class="note-chip" onclick="sendQuickChat('👋 Hi! I am at home, please come up to Flat 302.')">👋 I'm home</button>
+            <button class="note-chip" onclick="sendQuickChat('🔑 Security gate passcode is #1204.')">🔑 Gate code #1204</button>
+            <button class="note-chip" onclick="sendQuickChat('🧴 Please bring extra microfiber cloths.')">🧴 Extra cloths</button>
+          </div>
+
+          <div class="promo-row">
+            <input
+              type="text"
+              id="chat-input"
+              class="text-input"
+              placeholder="Message your Sifto Pro..."
+            />
+            <button class="apply-btn" onclick="sendChatMessage()">Send 💬</button>
+          </div>
+        </div>
+
+        <div class="empty-state" id="no-tracker-empty">
+          No active Pro on the way right now. Book a service on the <strong>🏠 Book</strong> tab or tap <strong>Track Live 📍</strong> on any active booking!
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SCREEN 3: MY SAVED BOOKINGS (Bookings Tab)
+           ========================================== -->
+      <section class="app-page" id="page-bookings">
+        <div class="bookings-section">
+          <div class="bookings-header">
+            <div class="section-title" style="margin-bottom: 0;">My Saved Bookings</div>
+            <span class="count-badge" id="booking-count">0 saved</span>
+          </div>
+
+          <div class="filter-bar">
+            <button class="filter-tab selected" onclick="setBookingFilter(this, 'ALL')">All</button>
+            <button class="filter-tab" onclick="setBookingFilter(this, 'ACTIVE')">Active</button>
+            <button class="filter-tab" onclick="setBookingFilter(this, 'COMPLETED')">Completed</button>
+          </div>
+
+          <div class="search-box">
+            <input
+              type="text"
+              id="search-bookings-input"
+              class="text-input"
+              placeholder="🔍 Search bookings by chore, Pro, or ID..."
+              oninput="renderBookings()"
+            />
+          </div>
+
+          <div class="bookings-list" id="bookings-list">
+            <div class="empty-state">No bookings yet. Tap "Book a Sifto Pro Now" on the Book tab!</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SCREEN 4: WALLET & PROFILE (Wallet Tab)
+           ========================================== -->
+      <section class="app-page" id="page-wallet">
+        <div class="section-title">💰 Sifto Wallet & Activity Summary</div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="stat-total-bookings">0</div>
+            <div class="stat-label">Total Bookings</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-wallet-card">₹500</div>
+            <div class="stat-label">Wallet Balance</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="stat-total-saved">₹0</div>
+            <div class="stat-label">Promo Saved</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">Instant Wallet Top-Up:</div>
+          <div class="topup-grid">
+            <button class="topup-card-btn" onclick="topUpWallet(100)">+ ₹100</button>
+            <button class="topup-card-btn" onclick="topUpWallet(200)">+ ₹200</button>
+            <button class="topup-card-btn" onclick="topUpWallet(500)">+ ₹500</button>
+          </div>
+        </div>
+
+        <div class="booking-bar" style="flex-direction: column; align-items: flex-start; gap: 6px;">
+          <div class="booking-bar-value">👤 Member Profile: Sifto</div>
+          <div class="booking-bar-label">📍 Default Area: Jubilee Hills, Hyderabad</div>
+          <div class="booking-bar-label">🛡️ Verified Sifto Plus Member · Zero Surge Fee</div>
+        </div>
+        <div>
+          <div class="section-title">🗄️ Data & Cloud Sync Controls:</div>
+          <div class="plan-toggle-row">
+            <button class="plan-pill" onclick="exportBookingsJson()">⬇️ Export Bookings JSON</button>
+            <button class="plan-pill" onclick="resetDemoData()">🔄 Reset App Data</button>
+          </div>
+          <div id="data-feedback" class="promo-feedback"></div>
+        </div>
+      </section>
+
+      <!-- ==========================================
+           SCREEN 5: PRO PARTNER MODE
+           ========================================== -->
+      <section class="app-page" id="page-partner">
+        <div class="section-title">👷 Sifto Pro Partner Console</div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num" id="pro-stat-earnings">₹0</div>
+            <div class="stat-label">Pro Earnings</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="pro-stat-active">0</div>
+            <div class="stat-label">Assigned Jobs</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num" id="pro-stat-rating">4.9★</div>
+            <div class="stat-label">Avg Rating</div>
+          </div>
+        </div>
+
+        <div>
+          <div class="section-title">Live Incoming Customer Jobs:</div>
+          <div class="bookings-list" id="partner-jobs-list">
+            <div class="empty-state">No customer bookings yet. Create a booking on the Book tab to dispatch it here!</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- RECEIPT MODAL OVERLAY -->
+    <div class="modal-backdrop" id="receipt-modal">
+      <div class="receipt-modal-box">
+        <div class="receipt-header">
+          <div class="section-title" style="margin-bottom: 0;">🧾 Official Sifto Receipt</div>
+          <button class="receipt-btn" onclick="closeReceiptModal()">Close ✕</button>
+        </div>
+        <div class="receipt-body" id="receipt-modal-content"></div>
+        <div class="promo-feedback" id="copy-receipt-feedback"></div>
+        <button class="book-btn" style="padding: 12px;" onclick="copyReceiptText()">
+          Copy Receipt to Clipboard 📋
+        </button>
+      </div>
+    </div>
+
+    <!-- STICKY BOTTOM NAVIGATION BAR (5 TABS) -->
+    <nav class="bottom-nav">
+      <button class="nav-tab active-nav" id="nav-book" onclick="switchPage('book')">
+        <span class="nav-icon">🏠</span>
+        <span>Book</span>
+      </button>
+      <button class="nav-tab" id="nav-track" onclick="switchPage('track')">
+        <span class="nav-icon">🛵</span>
+        <span>Live Track</span>
+      </button>
+      <button class="nav-tab" id="nav-bookings" onclick="switchPage('bookings')">
+        <span class="nav-icon">📋</span>
+        <span>Bookings</span>
+        <span class="nav-badge" id="nav-bookings-badge">0</span>
+      </button>
+      <button class="nav-tab" id="nav-wallet" onclick="switchPage('wallet')">
+        <span class="nav-icon">💰</span>
+        <span>Wallet</span>
+      </button>
+      <button class="nav-tab" id="nav-partner" onclick="switchPage('partner')">
+        <span class="nav-icon">👷</span>
+        <span>Pro Mode</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ==========================================
+       PART 3: JavaScript (Custom Chores, Address Book & Core Logic)
+       ========================================== -->
+  <script src="db_config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

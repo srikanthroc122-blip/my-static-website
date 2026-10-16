@@ -1,0 +1,1064 @@
+/* ==========================================
+       PART 2: CSS (Custom Chore Creator & Address Book)
+       ========================================== */
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --primary-light: #eef2ff;
+      --accent: #10b981;
+      --accent-light: #ecfdf5;
+      --warning: #f59e0b;
+      --warning-light: #fffbeb;
+      --danger: #ef4444;
+      --danger-light: #fef2f2;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --surface: #f1f5f9;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    body.dark-mode {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #1e1b4b;
+      --accent-light: #064e3b;
+      --warning-light: #451a03;
+      --danger-light: #450a0a;
+      --bg: #090d16;
+      --card: #111827;
+      --surface: #1e293b;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --border: #334155;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      padding: 20px 14px;
+      min-height: 100vh;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 460px;
+      background: var(--card);
+      border-radius: 24px;
+      box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 680px;
+      position: relative;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .app-header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #ffffff;
+      padding: 20px 20px 16px;
+    }
+
+    .header-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .theme-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      border-radius: 999px;
+      padding: 4px 11px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .app-header h1 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .app-header p {
+      font-size: 13px;
+      opacity: 0.92;
+      margin-top: 3px;
+    }
+
+    .wallet-bar {
+      margin-top: 12px;
+      background: rgba(15, 23, 42, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 14px;
+      padding: 8px 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .wallet-info {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .wallet-topup-btn {
+      background: #ffffff;
+      color: #312e81;
+      border: none;
+      border-radius: 9px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .app-body {
+      padding: 18px 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .app-page {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .app-page.active-page {
+      display: flex;
+    }
+
+    /* 3-Step Booking Wizard inside Book Tab */
+    .wizard-stepper {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      background: var(--surface);
+      padding: 6px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .wizard-pill {
+      background: transparent;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 4px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .wizard-pill.active-wizard {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .wizard-pane {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .wizard-pane.active-pane {
+      display: flex;
+    }
+
+    .wizard-nav-row {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .secondary-btn {
+      flex: 1;
+      background: var(--surface);
+      color: var(--text);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 13px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .primary-next-btn {
+      flex: 2;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      padding: 13px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* Sticky Bottom Navigation Bar (5 Tabs) */
+    .bottom-nav {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      padding: 8px 4px 10px;
+      gap: 3px;
+    }
+
+    .nav-tab {
+      background: transparent;
+      border: none;
+      border-radius: 12px;
+      padding: 8px 2px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.15s ease;
+    }
+
+    .nav-tab.active-nav {
+      color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .nav-icon {
+      font-size: 17px;
+      line-height: 1;
+    }
+
+    .nav-badge {
+      position: absolute;
+      top: 3px;
+      right: 10px;
+      background: var(--primary);
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 800;
+      padding: 1px 5px;
+      border-radius: 999px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    /* 2x2 grid for service cards */
+    .service-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .service-card {
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 12px;
+      text-align: left;
+      background: var(--card);
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .service-card:hover {
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    .service-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .service-icon {
+      font-size: 24px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .service-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      display: block;
+    }
+
+    .service-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      display: block;
+    }
+
+    .service-price {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--primary);
+      margin-top: 6px;
+      display: block;
+    }
+
+    /* NEW IN STEP 9: Custom Chore Builder Box */
+    .custom-chore-box {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .custom-chore-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    /* NEW IN STEP 9: Saved Address Book Pills */
+    .address-book-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .address-pill {
+      background: var(--surface);
+      color: var(--text);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .address-pill.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .plan-toggle-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .plan-pill {
+      border: 2px solid var(--border);
+      background: var(--card);
+      border-radius: 12px;
+      padding: 9px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .plan-pill.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* Duration Pills */
+    .hours-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .hour-pill {
+      border: 2px solid var(--border);
+      background: var(--card);
+      border-radius: 12px;
+      padding: 10px 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .hour-pill.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* Choose Sifto Pro Cards & Payment Cards */
+    .pro-list, .payment-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .pro-card, .payment-card {
+      border: 2px solid var(--border);
+      background: var(--card);
+      border-radius: 14px;
+      padding: 10px 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .pro-card.selected, .payment-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .pro-name, .payment-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      display: block;
+    }
+
+    .pro-sub, .payment-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+      display: block;
+    }
+
+    /* Address, Time & Special Notes Inputs */
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .text-input, .select-input {
+      width: 100%;
+      padding: 11px 13px;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--card);
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .text-input:focus, .select-input:focus {
+      border-color: var(--primary);
+    }
+
+    /* Promo Code & Quick Note Chips */
+    .promo-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .apply-btn {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 0 16px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .promo-chips, .note-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+    }
+
+    .promo-chip, .note-chip {
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .promo-feedback {
+      display: none;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 10px;
+      border-radius: 10px;
+      margin-top: 6px;
+    }
+
+    .promo-feedback.success {
+      display: block;
+      background: var(--accent-light);
+      color: #10b981;
+    }
+
+    .promo-feedback.error {
+      display: block;
+      background: var(--danger-light);
+      color: var(--danger);
+    }
+
+    .error-msg {
+      display: none;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--danger);
+      background: var(--danger-light);
+      padding: 8px 12px;
+      border-radius: 10px;
+    }
+
+    .error-msg.visible {
+      display: block;
+    }
+
+    /* Summary & Primary Action Button */
+    .booking-bar {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .booking-bar-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .booking-bar-value {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 2px;
+    }
+
+    .discount-tag {
+      color: #10b981;
+      font-weight: 700;
+    }
+
+    .book-btn {
+      width: 100%;
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 14px;
+      padding: 15px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .book-btn:hover {
+      background: var(--primary-dark);
+    }
+
+    /* Confirmation Box */
+    .confirmation-card {
+      display: none;
+      background: var(--accent-light);
+      border: 1.5px solid #10b981;
+      border-radius: 16px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .confirmation-card.visible {
+      display: block;
+    }
+
+    .confirmation-title {
+      font-weight: 800;
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: #10b981;
+    }
+
+    /* Live Arrival Tracker Card */
+    .tracker-card {
+      display: none;
+      background: var(--primary-light);
+      border: 1.5px solid var(--primary);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .tracker-card.visible {
+      display: block;
+    }
+
+    .tracker-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .tracker-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .otp-pill {
+      background: var(--card);
+      color: var(--primary);
+      border: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 8px;
+    }
+
+    .progress-bar-track {
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 25%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    .tracker-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+      font-size: 11px;
+      text-align: center;
+      margin-bottom: 12px;
+    }
+
+    .tracker-step {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .tracker-step.active {
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .tracker-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tracker-status-text {
+      font-size: 12px;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .step-btn {
+      background: var(--primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Live In-App Chat Card */
+    .chat-card {
+      display: none;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat-card.visible {
+      display: flex;
+    }
+
+    .chat-messages {
+      max-height: 170px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px;
+      background: var(--surface);
+      border-radius: 12px;
+    }
+
+    .chat-bubble {
+      max-width: 82%;
+      padding: 8px 11px;
+      border-radius: 12px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .chat-bubble.user {
+      align-self: flex-end;
+      background: var(--primary);
+      color: #ffffff;
+      border-bottom-right-radius: 3px;
+    }
+
+    .chat-bubble.pro {
+      align-self: flex-start;
+      background: var(--card);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 3px;
+    }
+
+    .chat-sender {
+      font-size: 10px;
+      font-weight: 700;
+      opacity: 0.8;
+      margin-bottom: 2px;
+      display: block;
+    }
+
+    /* Printable / Copyable Receipt Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.55);
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal-backdrop.visible {
+      display: flex;
+    }
+
+    .receipt-modal-box {
+      width: 100%;
+      max-width: 380px;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: 20px;
+      padding: 18px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .receipt-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px dashed var(--border);
+      padding-bottom: 10px;
+    }
+
+    .receipt-body {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--surface);
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    .receipt-btn {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* My Saved Bookings List + Filter Controls */
+    .bookings-section {
+      padding-top: 4px;
+    }
+
+    .bookings-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .count-badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 999px;
+    }
+
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .filter-tab {
+      flex: 1;
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 7px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .filter-tab.selected {
+      background: var(--primary);
+      color: #ffffff;
+      border-color: var(--primary);
+    }
+
+    .search-box {
+      margin-bottom: 12px;
+    }
+
+    .bookings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .empty-state {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      padding: 18px 14px;
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px dashed var(--border);
+    }
+
+    .booking-item {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      background: var(--card);
+    }
+
+    .booking-item.completed {
+      background: var(--surface);
+    }
+
+    .booking-item-info {
+      font-size: 13px;
+      line-height: 1.45;
+      flex: 1;
+    }
+
+    .booking-item-title {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .booking-item-sub {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .booking-note-tag {
+      display: inline-block;
+      margin-top: 4px;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .rating-row {
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .rating-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      margin-right: 4px;
+    }
+
+    .star-btn {
+      background: var(--warning-light);
+      border: 1px solid #fde68a;
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 12px;
+      cursor: pointer;
+      color: #d97706;
+      font-weight: 700;
+    }
+
+    .star-btn.rated {
+      background: var(--warning);
+      color: #ffffff;
+      border-color: var(--warning);
+    }
+
+    .booking-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .track-btn {
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .done-btn {
+      background: var(--accent-light);
+      color: #10b981;
+      border: 1px solid #10b981;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .cancel-btn {
+      background: var(--danger-light);
+      color: var(--danger);
+      border: 1px solid var(--danger);
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Wallet & Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .topup-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .topup-card-btn {
+      background: var(--primary-light);
+      color: var(--primary);
+      border: 1.5px solid var(--primary);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
